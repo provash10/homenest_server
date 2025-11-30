@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require ('express')
 const cors = require('cors');
 const app = express()
 require('dotenv').config();
@@ -33,14 +33,21 @@ async function run() {
     app.get('/properties', async(req, res)=>{
         const result = await propertiesCollection.find().toArray()
 
-
         res.send(result)
     })
 
     app.post('/properties', async(req, res)=>{
         const properties = req.body;
+        
+        console.log(properties);
+        if(!properties || Object.keys(properties).length === 0){
+        return res.status(400).send({ success: false, message: "No data received" });
+    }
         const result = await propertiesCollection.insertOne(properties);
-        res.send(result);
+        res.send({
+          success: true,
+          result
+        });
     })
 
     // Send a ping to confirm a successful connection
