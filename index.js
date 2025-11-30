@@ -26,12 +26,15 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const db = client.db('homenest_db');
+    const db = client.db('homenest_user_db');
     const propertiesCollection = db.collection('properties');
 
     //properties api
     app.get('/properties', async(req, res)=>{
-        
+        const result = await propertiesCollection.find().toArray()
+
+
+        res.send(result)
     })
 
     app.post('/properties', async(req, res)=>{
