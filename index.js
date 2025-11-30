@@ -2,7 +2,7 @@ const express = require ('express')
 const cors = require('cors');
 const app = express()
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 3000;
 
@@ -36,9 +36,23 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/properties/:id', async(req, res)=>{
+      const {id} = req.params;
+      console.log(id); //checked
+
+      const objectId = new ObjectId(id)
+      const result =await propertiesCollection.findOne({_id: objectId})
+
+      res.send({
+        success: true,
+        result
+        
+      })
+    })
+
     app.post('/properties', async(req, res)=>{
         const properties = req.body;
-        
+
         console.log(properties);
         if(!properties || Object.keys(properties).length === 0){
         return res.status(400).send({ success: false, message: "No data received" });
