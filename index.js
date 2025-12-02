@@ -82,6 +82,18 @@ async function run() {
       })
     })
 
+    app.delete('/properties/:id', async(req, res) =>{
+      const {id} = req.params;
+
+      const objectId = new ObjectId(id)
+      // const filter = {_id: objectId}
+
+      const result = await propertiesCollection.deleteOne({_id : objectId})
+      res.send({
+        success: true
+      })
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
