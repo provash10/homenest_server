@@ -64,6 +64,24 @@ async function run() {
         });
     })
 
+    app.put('/properties/:id',async(req, res)=>{
+      const {id} = req.params;
+      const data = req.body
+      // console.log(id)
+      // console.log(data)
+      const objectId = new ObjectId(id)
+      const filter = {_id: objectId}
+      const update = {
+        $set: data
+      }
+      const result = await propertiesCollection.updateOne(filter, update)
+
+      res.send({
+        success: true,
+        result
+      })
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -82,3 +100,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
