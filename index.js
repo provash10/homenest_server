@@ -36,6 +36,14 @@ async function run() {
         res.send(result)
     })
 
+    //featured data sorting -Home
+    app.get('/featured-properties',async(req, res)=>{
+      const result = await propertiesCollection.find().sort({createdAt: -1}).limit(6).toArray();
+      console.log(result)
+
+      res.send(result)
+    })
+
     app.get('/properties/:id', async(req, res)=>{
       const {id} = req.params;
       console.log(id); //checked
