@@ -27,6 +27,7 @@ async function run() {
 
     const db = client.db("homenest_user_db");
     const propertiesCollection = db.collection("properties");
+    const ratingsCollection = db.collection("ratings");
 
     //properties api
     app.get("/properties", async (req, res) => {
@@ -56,7 +57,9 @@ async function run() {
     // for my properties
     app.get("/my-properties/:email", async (req, res) => {
       const email = req.params.email;
+      // console.log(email)
       const result = await propertiesCollection.find({ userEmail: email }).toArray();
+
       res.send(result);
     });
 
@@ -116,6 +119,44 @@ async function run() {
       const result = await propertiesCollection.deleteOne({ _id: objectId });
       res.send({
         success: true,
+      });
+    });
+
+    //ratings
+    app.get('/ratings', async(req, res)=>{
+      
+       const result = await ratingsCollection.find().toArray();
+
+      res.send(result);
+    })
+
+    //my-ratings
+    app.get( "/my-ratings/:email", async (req, res) => {
+ 
+    const email = req.params.email;
+    const result = await ratingsCollection.find({ userEmail: email }).toArray();
+    res.send(result);
+  })
+
+   app.post("/ratings", async (req, res) => {
+      const ratings = req.body;
+
+      console.log(ratings);
+      
+      if (!ratings || Object.keys(ratings).length === 0) {
+        return res
+          .status(400)
+          .send({ success: false, message: "No data received" });
+      }
+
+       if (!ratings.userEmail || !ratings.propertyId || !ratings.rating) {
+      return res.status(400).send({ success: false, message: "Missing required fields" });
+    }
+
+      const result = await ratingsCollection.insertOne(ratings);
+      res.send({
+        success: true,
+        result,
       });
     });
 
