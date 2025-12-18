@@ -123,42 +123,94 @@ async function run() {
     });
 
     //ratings
-    app.get('/ratings', async(req, res)=>{
-      
-       const result = await ratingsCollection.find().toArray();
+    // app.get('/ratings', async(req, res)=>{
+    // const result = await ratingsCollection.find().toArray();
+    //   res.send(result);
+    // })
 
-      res.send(result);
-    })
+    app.get("/ratings", async (req, res) => {
+  const propertyId = req.query.propertyId;
+  const query = propertyId ? { propertyId } : {};
+  const result = await ratingsCollection.find(query).sort({ reviewDate: -1 }).toArray();
+
+  res.send(result);
+});
+
 
     //my-ratings
-    app.get( "/my-ratings/:email", async (req, res) => {
+  //   app.get( "/my-ratings/:email", async (req, res) => {
  
-    const email = req.params.email;
-    const result = await ratingsCollection.find({ userEmail: email }).toArray();
-    res.send(result);
-  })
+  //   const email = req.params.email;
+  //   const result = await ratingsCollection.find({ userEmail: email }).toArray();
+  //   res.send(result);
+  // })
+app.get("/my-ratings/:email", async (req, res) => {
+  const email = req.params.email;
+  const result = await ratingsCollection.find({ reviewerEmail: email }).toArray();
+  res.send(result);
+});
 
-   app.post("/ratings", async (req, res) => {
-      const ratings = req.body;
+//    app.post("/ratings", async (req, res) => {
+//       const ratings = req.body;
 
-      console.log(ratings);
+//       console.log(ratings);
       
-      if (!ratings || Object.keys(ratings).length === 0) {
-        return res
-          .status(400)
-          .send({ success: false, message: "No data received" });
-      }
+//       // if (!ratings || Object.keys(ratings).length === 0) {
+//       //   return res
+//       //     .status(400)
+//       //     .send({ success: false, message: "No data received" });
+//       // }
 
-       if (!ratings.userEmail || !ratings.propertyId || !ratings.rating) {
-      return res.status(400).send({ success: false, message: "Missing required fields" });
-    }
+//       if (!ratings.reviewerEmail || !ratings.propertyId || !ratings.rating) {
+//   return res.status(400).send({
+//     success: false,
+//     message: "Missing required fields",
+//   });
+// }
 
-      const result = await ratingsCollection.insertOne(ratings);
-      res.send({
-        success: true,
-        result,
-      });
+
+//        if (!ratings.userEmail || !ratings.propertyId || !ratings.rating) {
+//       return res.status(400).send({ success: false, message: "Missing required fields" });
+//     }
+
+//       const result = await ratingsCollection.insertOne(ratings);
+//       res.send({
+//         success: true,
+//         result,
+//       });
+//     });
+
+app.post("/ratings", async (req, res) => {
+  const ratings = req.body;
+
+  if (!ratings.reviewerEmail || !ratings.propertyId || !ratings.rating) {
+    return res.status(400).send({
+      success: false,
+      message: "Missing required fields",
     });
+  }
+
+  const exists = await ratingsCollection.findOne({
+    propertyId: ratings.propertyId,
+    reviewerEmail: ratings.reviewerEmail,
+  });
+
+  if (exists) {
+    return res.status(409).send({
+      success: false,
+      message: "You already reviewed this property",
+    });
+  }
+
+  ratings.reviewDate = new Date();
+
+  const result = await ratingsCollection.insertOne(ratings);
+  res.send({
+    success: true,
+    result,
+  });
+});
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
